@@ -2,9 +2,9 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import status
 from django.templatetags.static import static
-import phonenumbers
 from .models import Product, Order, OrderItems
 from rest_framework.decorators import api_view
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -59,56 +59,44 @@ def product_list_api(request):
     })
 
 
-def check_order(order, phonenumber):
-    keys = ('address', 'firstname', 'lastname', 'phonenumber')
-    missing_keys = []
-    errors = []
-    products = order.get('products')
-    if not products or not isinstance(products, list):
-        content = {'error': 'products key not presented or not list'}
-        errors.append(content)
-    for key in keys:
-        order_key = order.get(key)
-        if not order_key or not isinstance(order_key, str):
-            missing_keys.append(order_key)
-    if not phonenumbers.is_valid_number(phonenumber):
-        phone_error = {
-            'error': f'Such phonenumber={phonenumber} does not exist'
-        }
-    valid_phonenumber = phonenumbers.format_number(
-        phonenumber,
-        phonenumbers.PhoneNumberFormat.E164,
-    )
-    if missing_keys:
-        miss_content = {'error': f'The keys {missing_keys} not specified or not str'}
-        errors.append(miss_content)
-    return valid_phonenumber, phone_error, errors
+# def check_order(order, phonenumber):
+#     keys = ('address', 'firstname', 'lastname', 'phonenumber')
+#     missing_keys = []
+#     errors = []
+#     products = order.get('products')
+#     if not products or not isinstance(products, list):
+#         content = {'error': 'products key not presented or not list'}
+#         errors.append(content)
+#     for key in keys:
+#         order_key = order.get(key)
+#         if not order_key or not isinstance(order_key, str):
+#             missing_keys.append(order_key)
+#     if not phonenumbers.is_valid_number(phonenumber):
+#         phone_error = {
+#             'error': f'Such phonenumber={phonenumber} does not exist'
+#         }
+#     valid_phonenumber = phonenumbers.format_number(
+#         phonenumber,
+#         phonenumbers.PhoneNumberFormat.E164,
+#     )
+#     if missing_keys:
+#         miss_content = {'error': f'The keys {missing_keys} not specified or not str'}
+#         errors.append(miss_content)
+#     return valid_phonenumber, phone_error, errors
 
 
 @api_view(['POST'])
 def register_order(request):
-    order = request.data
-    products = order.get('products')
-    try:
-        phonenumber = phonenumbers.parse(order.get('phonenumber'), 'RU')
-    except Exception:
-        content = {
-            'error': f'Such phonenumber does not exist'
-        }
-        return Response(content, status=status.HTTP_404_NOT_FOUND)
-    valid_phonenumber, phone_error, errors = check_order(order, phonenumber)
-    if errors:
-        return Response(errors, status=status.HTTP_404_NOT_FOUND)
-    if phone_error:
-        return Response(errors, status=status.HTTP_404_NOT_FOUND)
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
     created_order = Order.objects.create(
-        address=order.get('address'),
-        firstname=order.get('firstname'),
-        lastname=order.get('lastname'),
-        phonenumber=valid_phonenumber,
+        address=serializer.validated_data['address'],
+        firstname=serializer.validated_data['firstname'],
+        lastname=serializer.validated_data['lastname'],
+        phonenumber=serializer.validated_data['phonenumber'],
     )
     all_products = Product.objects.prefetch_related()
-    for product in products:
+    for product in serializer.validated_data['products']:
         OrderItems.objects.create(
             order=created_order,
             product=all_products.get(id=product.get('product')),

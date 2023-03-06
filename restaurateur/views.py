@@ -94,5 +94,5 @@ def view_restaurants(request):
 def view_orders(request):
     orders = Order.objects.prefetch_related()
     return render(request, template_name='order_items.html', context={
-        'order_items': orders
+        'order_items': Order.objects.get_order(),
     })

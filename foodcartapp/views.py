@@ -1,6 +1,7 @@
+from rest_framework.response import Response
 from django.http import JsonResponse
+from rest_framework import status
 from django.templatetags.static import static
-import json
 import phonenumbers
 from .models import Product, Order, OrderItems
 from rest_framework.decorators import api_view
@@ -58,9 +59,17 @@ def product_list_api(request):
     })
 
 
+def check_order(order):
+    print(order)
+
+
 @api_view(['POST'])
 def register_order(request):
-    order = json.loads(request.body.decode())
+    order = request.data
+    products = order.get('products')
+    if not products or not isinstance(products, list):
+        content = {'error': 'products key not presented or not list'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
     phonenumber = phonenumbers.parse(order.get('phonenumber'), 'RU')
     if phonenumbers.is_valid_number(phonenumber):
         valid_phonenumber = phonenumbers.format_number(
@@ -74,11 +83,10 @@ def register_order(request):
         phonenumber=valid_phonenumber,
     )
     all_products = Product.objects.prefetch_related()
-    for product in order.get('products'):
+    for product in products:
         OrderItems.objects.create(
             order=created_order,
-            product=all_products.get(id=product.get('product').id),
+            product=all_products.get(id=product.get('product')),
             quantity=product.get('quantity'),
         )
-    print(order)
-    return JsonResponse({})
+    return Response()

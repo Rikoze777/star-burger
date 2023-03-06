@@ -89,7 +89,7 @@ def product_list_api(request):
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    created_order = Order.objects.create(
+    order = Order.objects.create(
         address=serializer.validated_data['address'],
         firstname=serializer.validated_data['firstname'],
         lastname=serializer.validated_data['lastname'],
@@ -98,8 +98,9 @@ def register_order(request):
     all_products = Product.objects.prefetch_related()
     for product in serializer.validated_data['products']:
         OrderItems.objects.create(
-            order=created_order,
-            product=all_products.get(id=product.get('product')),
+            order=order,
+            product=all_products.get(id=product.get('product').id),
             quantity=product.get('quantity'),
         )
-    return Response()
+    serializer = OrderSerializer(order)
+    return Response(serializer.data)

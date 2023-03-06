@@ -3,6 +3,7 @@ from django.templatetags.static import static
 import json
 import phonenumbers
 from .models import Product, Order, OrderItems
+from rest_framework.decorators import api_view
 
 
 def banners_list_api(request):
@@ -57,6 +58,7 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
     order = json.loads(request.body.decode())
     phonenumber = phonenumbers.parse(order.get('phonenumber'), 'RU')

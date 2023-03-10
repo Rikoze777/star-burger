@@ -8,14 +8,7 @@ class OrderQueryset(models.QuerySet):
     def get_order(self):
         orders = OrderItems.objects.annotate(
             product_price=F('price') * F('quantity')
-        )\
-        .values(
-            'order__id',
-            'order__firstname',
-            'order__lastname',
-            'order__address',
-            'order__phonenumber',
-        ).annotate(order_price=(Sum('product_price')))
+        ).annotate(order_price=(Sum('product_price'))).select_related('order')
         return orders
 
 
@@ -173,6 +166,7 @@ class Order(models.Model):
         default='Обрабатывается',
         db_index=True
     )
+    comment = models.TextField('Комментарий к заказу', blank=True)
     objects = OrderQueryset.as_manager()
 
     class Meta:

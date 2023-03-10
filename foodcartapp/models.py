@@ -141,6 +141,12 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
+    ORDER_STATE_CHOICES = [
+        ('accepted', 'Обрабатывается'),
+        ('packing', 'Упаковывается'),
+        ('delivery', 'Передан в доставку'),
+        ('done', 'Выполнен')
+    ]
     address = models.CharField(
         'адрес',
         max_length=100,
@@ -159,6 +165,13 @@ class Order(models.Model):
     phonenumber = PhoneNumberField(
         'телефон',
         db_index=True,
+    )
+    status = models.CharField(
+        'Статус',
+        max_length=50,
+        choices=ORDER_STATE_CHOICES,
+        default='Обрабатывается',
+        db_index=True
     )
     objects = OrderQueryset.as_manager()
 

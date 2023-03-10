@@ -141,6 +141,11 @@ class Order(models.Model):
         ('delivery', 'Передан в доставку'),
         ('done', 'Выполнен')
     ]
+    PAYMENT_CHOICES = [
+        ('specify', 'Выяснить'),
+        ('cash', 'Наличные'),
+        ('card', 'Карта')
+    ]
     address = models.CharField(
         'адрес',
         max_length=100,
@@ -184,6 +189,13 @@ class Order(models.Model):
         'Время доставки',
         null=True,
         blank=True,
+        db_index=True
+    )
+    pay_method = models.CharField(
+        'Способ оплаты',
+        max_length=50,
+        choices=PAYMENT_CHOICES,
+        default='Выяснить',
         db_index=True
     )
     objects = OrderQueryset.as_manager()

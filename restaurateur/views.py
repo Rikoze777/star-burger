@@ -1,7 +1,8 @@
+from datetime import datetime
+
 import requests
-from geopy import distance
-from star_burger.settings import YANDEX_API_KEY
 from django import forms
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
@@ -9,8 +10,11 @@ from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.conf import settings
+from geopy import distance
+
 from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
+from locations.models import Location
+from star_burger.settings import YANDEX_API_KEY
 
 
 class Login(forms.Form):
@@ -103,7 +107,7 @@ def fetch_coordinates(apikey, address):
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
     if not found_places:
-        return None
+        return (0, 0)
 
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
@@ -115,28 +119,50 @@ def view_orders(request):
     orders = Order.objects.get_order().exclude(status='done')
     order_restaurants = []
     for order in orders:
-        products = order.order_items.prefetch_related().values('product__id')
+        products = [item.product.id for item in order.order_items.select_related('product')]
         restaurants = RestaurantMenuItem.objects.filter(product__id__in=products) \
-            .values('restaurant__name', 'restaurant__address').annotate(Count('product__id')) \
-            .filter(product__id__count=products.count())
-        order_coordinates = fetch_coordinates(
-            settings.YANDEX_API_KEY,
-            order.address
-        )
-        for restaurant in restaurants:
-            restaurant_coordinates = fetch_coordinates(
+            .values('restaurant__name', 'restaurant__address')\
+            .annotate(count_items=(Count('product__id'))).filter(count_items=len(products))
+        try:
+            location = Location.objects.get(address=order.address)
+            order_coordinates = (location.lon, location.lat)
+        except Location.DoesNotExist:
+            lon, lat = fetch_coordinates(
                 settings.YANDEX_API_KEY,
-                restaurant['restaurant__address']
+                order.address
             )
+            location = Location.objects.create(
+                address=order.address,
+                lon=lon,
+                lat=lat,
+                query_date=datetime.now()
+            )
+            order_coordinates = (location.lon, location.lat)
+        for restaurant in restaurants:
+            try:
+                location = Location.objects.get(address=restaurant['restaurant__address'])
+                restaurant_coordinates = (location.lon, location.lat)
+            except Location.DoesNotExist:
+                lon, lat = fetch_coordinates(
+                    settings.YANDEX_API_KEY,
+                    restaurant['restaurant__address']
+                )
+                location = Location.objects.create(
+                    address=restaurant['restaurant__address'],
+                    lon=lon,
+                    lat=lat,
+                    query_date=datetime.now()
+                )
+                restaurant_coordinates = (location.lon, location.lat)
             restaurant['coordinates'] = restaurant_coordinates
             try:
                 distance_to_order = distance.distance(
                     order_coordinates,
                     restaurant_coordinates
                 ).km
-                restaurant['distance_to_order'] = f'{round(distance_to_order, 2)} км' 
+                restaurant['distance_to_order'] = f'{round(distance_to_order, 2)} км'
             except ValueError:
-                restaurant['distance_to_order'] = '0 км'  
+                restaurant['distance_to_order'] = '0 км'
         order_restaurants.append((order, sorted(restaurants, key=lambda restaurant: restaurant['distance_to_order'])))
 
     return render(request, template_name='order_items.html', context={

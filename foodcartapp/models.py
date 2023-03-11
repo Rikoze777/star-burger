@@ -7,10 +7,9 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class OrderQueryset(models.QuerySet):
     def get_order(self):
-        orders = OrderItems.objects.annotate(
-            product_price=F('price') * F('quantity')
-        ).annotate(order_price=(Sum('product_price'))).select_related('order')
-        return orders
+        return self.annotate(
+            order_price=Sum(F('order_items__product__price') * F('order_items__quantity'))
+        )
 
 
 class Restaurant(models.Model):

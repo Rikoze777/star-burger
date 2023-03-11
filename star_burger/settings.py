@@ -20,6 +20,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 YANDEX_API_KEY = env('YANDEX_API_KEY')
 
 INSTALLED_APPS = [
+    'locations.apps.LocationsConfig',
     'foodcartapp.apps.FoodcartappConfig',
     'restaurateur.apps.RestaurateurConfig',
     'django.contrib.admin',

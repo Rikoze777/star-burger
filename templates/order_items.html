@@ -24,7 +24,7 @@
       <th>Ссылка на админку</th>
     </tr>
 
-    {% for item in order_items %}
+    {% for item, restaurants in order_items %}
       <tr>
         <td>{{ item.id }}</td>
         <td>{{ item.status }}</td>
@@ -34,6 +34,18 @@
         <td>{{ item.phonenumber }}</td>
         <td>{{ item.address }}</td>
         <td>{{ item.comment }}</td>
+        <td>
+          {% if item.restaurant %}
+            {{ item.restaurant.name }}
+          {% else %}
+            <details>
+              <summary>Может быть приготовлен ресторанами:</summary>
+              {% for restaurant in restaurants %}
+                <li>{{ restaurant.restaurant__name }}</li>
+              {% endfor %}
+            </details>
+          {% endif %}
+        </td>
         <td>
           <a href="{% url 'admin:foodcartapp_order_change' object_id=item.id %}?next={{ request.path|urlencode }}">Редактировать</a>
         </td>

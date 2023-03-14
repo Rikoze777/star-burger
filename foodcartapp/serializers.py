@@ -15,6 +15,9 @@ class OrderSerializer(ModelSerializer):
     products = OrderitemsSerializer(many=True, allow_empty=False,
                                     write_only=True,)
 
+    def create(self, validated_data):
+        return Order(**validated_data)
+
     class Meta:
         model = Order
         fields = [

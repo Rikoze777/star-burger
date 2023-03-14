@@ -113,6 +113,25 @@ def fetch_coordinates(apikey, address):
     return lon, lat
 
 
+def get__coordinates(order_address):
+    try:
+        location = Location.objects.get(address=order_address)
+        order_coordinates = (location.lon, location.lat)
+    except Location.DoesNotExist:
+        lon, lat = fetch_coordinates(
+            settings.YANDEX_API_KEY,
+            order_address,
+        )
+        location = Location.objects.create(
+            address=order_address,
+            lon=lon,
+            lat=lat,
+            query_date=datetime.now()
+        )
+        order_coordinates = (location.lon, location.lat)
+    return order_coordinates
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.get_order().exclude(status='done')
@@ -120,37 +139,9 @@ def view_orders(request):
     for order in orders:
         products = [item.product.id for item in order.order_items.select_related('product')]
         restaurants = RestaurantMenuItem.objects.get_restaurants(products)
-        try:
-            location = Location.objects.get(address=order.address)
-            order_coordinates = (location.lon, location.lat)
-        except Location.DoesNotExist:
-            lon, lat = fetch_coordinates(
-                settings.YANDEX_API_KEY,
-                order.address
-            )
-            location = Location.objects.create(
-                address=order.address,
-                lon=lon,
-                lat=lat,
-                query_date=datetime.now()
-            )
-            order_coordinates = (location.lon, location.lat)
+        order_coordinates = get__coordinates(order.address)
         for restaurant in restaurants:
-            try:
-                location = Location.objects.get(address=restaurant['restaurant__address'])
-                restaurant_coordinates = (location.lon, location.lat)
-            except Location.DoesNotExist:
-                lon, lat = fetch_coordinates(
-                    settings.YANDEX_API_KEY,
-                    restaurant['restaurant__address']
-                )
-                location = Location.objects.create(
-                    address=restaurant['restaurant__address'],
-                    lon=lon,
-                    lat=lat,
-                    query_date=datetime.now()
-                )
-                restaurant_coordinates = (location.lon, location.lat)
+            restaurant_coordinates = get__coordinates(restaurant['restaurant__address'])
             restaurant['coordinates'] = restaurant_coordinates
             try:
                 distance_to_order = distance.distance(

@@ -66,5 +66,4 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     order = serializer.save()
-    serializer = OrderSerializer(order)
     return Response(serializer.data)

@@ -1,6 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import Count, F, Sum
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -10,6 +10,13 @@ class OrderQueryset(models.QuerySet):
         return self.annotate(
             order_price=Sum(F('order_items__product__price') * F('order_items__quantity'))
         )
+
+
+class RestaurantMenuItemQueryset(models.QuerySet):
+    def get_restaurants(self, products):
+        return self.filter(product__id__in=products) \
+            .values('restaurant__name', 'restaurant__address')\
+            .annotate(count_items=(Count('product__id'))).filter(count_items=len(products))
 
 
 class Restaurant(models.Model):
@@ -121,6 +128,7 @@ class RestaurantMenuItem(models.Model):
         default=True,
         db_index=True
     )
+    objects = RestaurantMenuItemQueryset.as_manager()
 
     class Meta:
         verbose_name = 'пункт меню ресторана'

@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
@@ -120,9 +119,7 @@ def view_orders(request):
     order_restaurants = []
     for order in orders:
         products = [item.product.id for item in order.order_items.select_related('product')]
-        restaurants = RestaurantMenuItem.objects.filter(product__id__in=products) \
-            .values('restaurant__name', 'restaurant__address')\
-            .annotate(count_items=(Count('product__id'))).filter(count_items=len(products))
+        restaurants = RestaurantMenuItem.objects.get_restaurants(products)
         try:
             location = Location.objects.get(address=order.address)
             order_coordinates = (location.lon, location.lat)

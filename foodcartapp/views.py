@@ -66,13 +66,5 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     order = serializer.save()
-    all_products = Product.objects.prefetch_related()
-    for product in serializer.validated_data['products']:
-        OrderItems.objects.create(
-            order=order,
-            product=all_products.get(id=product.get('product').id),
-            quantity=product.get('quantity'),
-            price=Product.objects.get(id=product['product'].id).price
-        )
     serializer = OrderSerializer(order)
     return Response(serializer.data)

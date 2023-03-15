@@ -106,7 +106,7 @@ def fetch_coordinates(apikey, address):
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
     if not found_places:
-        return (0, 0)
+        return None, None
 
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
@@ -116,19 +116,23 @@ def fetch_coordinates(apikey, address):
 def get__coordinates(order_address):
     try:
         location = Location.objects.get(address=order_address)
-        order_coordinates = (location.lon, location.lat)
+        lon = location.lon
+        lat = location.lat
     except Location.DoesNotExist:
         lon, lat = fetch_coordinates(
             settings.YANDEX_API_KEY,
             order_address,
         )
-        location = Location.objects.create(
+        if not lon and not lat:
+            lon = 37.6156
+            lat = 55.7522
+        Location.objects.get_or_create(
             address=order_address,
             lon=lon,
             lat=lat,
             query_date=datetime.now()
         )
-        order_coordinates = (location.lon, location.lat)
+    order_coordinates = (lon, lat)
     return order_coordinates
 
 

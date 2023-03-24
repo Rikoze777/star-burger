@@ -113,7 +113,7 @@ def fetch_coordinates(apikey, address):
     return lon, lat
 
 
-def get__coordinates(order_address):
+def get_coordinates(order_address):
     try:
         location = Location.objects.get(address=order_address)
         lon = location.lon
@@ -143,9 +143,9 @@ def view_orders(request):
     for order in orders:
         products = [item.product.id for item in order.order_items.select_related('product')]
         restaurants = RestaurantMenuItem.objects.get_restaurants(products)
-        order_coordinates = get__coordinates(order.address)
+        order_coordinates = get_coordinates(order.address)
         for restaurant in restaurants:
-            restaurant_coordinates = get__coordinates(restaurant['restaurant__address'])
+            restaurant_coordinates = get_coordinates(restaurant['restaurant__address'])
             restaurant['coordinates'] = restaurant_coordinates
             try:
                 distance_to_order = distance.distance(

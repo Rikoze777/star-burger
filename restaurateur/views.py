@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
-from geo import get_coordinates
+from .geo import get_coordinates
 from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
 
 from star_burger.settings import YANDEX_API_KEY

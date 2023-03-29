@@ -45,13 +45,13 @@ def get_coordinates(order_address):
             lon, lat = None, None
         except HTTPError as Er:
             lon, lat = None, None
-    Location.objects.get_or_create(
-            query_date=datetime.now(),
-            defaults={
-            'address': order_address,
-            'lon': lon,
-            'lat': lat,
-            }
-        )
+        Location.objects.get_or_create(
+                query_date=datetime.now(),
+                defaults={
+                'address': order_address,
+                'lon': lon,
+                'lat': lat,
+                }
+            )
     order_coordinates = (lon, lat)
     return order_coordinates

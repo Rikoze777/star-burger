@@ -94,7 +94,11 @@ MEDIA_URL = '/media/'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
+        default='postgres://{user}:{password}@localhost:5432/{name}'.format(
+            user=env.str('POSTGRES_USER'),
+            password=env.str('POSTGRES_PASSWORD'),
+            name=env.str('POSTGRES_NAME')
+        )
     )
 }
 

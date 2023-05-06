@@ -154,6 +154,23 @@ Parcel будет следить за файлами в каталоге `bundle
 - `POSTGRES_PASSWORD` - пароль от бд postgresql.
 - `POSTGRES_NAME` - наименование бд postgresql.
 
+
+## Обновление проекта на сервере
+
+Изменения можно загружать bash-скриптом deploy_star_burger.sh. Скрипт лежит в корневой директории проекта.
+
+Дайте права скрипту следующей командой:
+
+```sh
+chmod 755 deploy_star_burger.sh
+```
+
+Запустите скрипт:
+
+```sh
+bash deploy_star_burger.sh
+```
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).

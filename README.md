@@ -153,9 +153,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `ROLLBAR_TOKEN` - Для отслеживания исключений во время разработки. В Project Access Tokens выберите post_server_item [Rollbar](https://rollbar.com/)
 - `ROLLBAR_ENV` - development или production. В зависимости от режима DEBUG.
-- `POSTGRES_USER` - пользователь postgresql.
-- `POSTGRES_PASSWORD` - пароль от бд postgresql.
-- `POSTGRES_NAME` - наименование бд postgresql.
+- `PSQL_URL` - postgresql url [как задать](https://github.com/jazzband/dj-database-url#url-schema)
 
 Также нужно добавить 2 переменные в окружение:
 Введите в терминале корня проекта

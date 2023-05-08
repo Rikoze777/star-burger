@@ -93,13 +93,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://{user}:{password}@localhost:5432/{name}'.format(
-            user=env.str('POSTGRES_USER'),
-            password=env.str('POSTGRES_PASSWORD'),
-            name=env.str('POSTGRES_NAME')
+    'default': 
+        dj_database_url.config(
+            default=env('PSQL_URL')
         )
-    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [

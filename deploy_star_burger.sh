@@ -13,11 +13,12 @@ python manage.py migrate --noinput
 
 systemctl restart burger.service
 systemctl reload nginx.service
-
+token=$(access_token)
+username=$(rollbar_user)
 last_commit=$(git rev-parse HEAD)
-curl -H "X-Rollbar-Access-Token: d4d0d9071b6b44308b55198dd65ee649" \
+curl -H "X-Rollbar-Access-Token: '${token}'" \
      -H "Content-Type: application/json" \
      -X POST 'https://api.rollbar.com/api/1/deploy' \
-     -d '{"environment": "production", "revision": "'${last_commit}'", "rollbar_username": "spawn00007", "status": "succeeded"}'
+     -d '{"environment": "production", "revision": "'${last_commit}'", "rollbar_username": "'${username}'", "status": "succeeded"}'
 
 echo Successful

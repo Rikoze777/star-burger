@@ -45,12 +45,15 @@ MIDDLEWARE = [
     'rollbar.contrib.django.middleware.RollbarNotifierMiddleware',
 ]
 
-ROLLBAR = {
-    'access_token': env.str('ROLLBAR_TOKEN'),
-    'environment': env.str('ROLLBAR_ENV'),
-    'code_version': '1.0',
-    'root': BASE_DIR,
-}
+ROLLBAR_ENABLED = env.bool('ROLLBAR_ENABLED', False)
+
+if ROLLBAR_ENABLED:
+    ROLLBAR = {
+        'access_token': env.str('ROLLBAR_TOKEN'),
+        'environment': env.str('ROLLBAR_ENV'),
+        'code_version': '1.0',
+        'root': BASE_DIR,
+    }
 
 ROOT_URLCONF = 'star_burger.urls'
 

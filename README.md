@@ -151,9 +151,11 @@ Parcel будет следить за файлами в каталоге `bundle
 - `DEBUG` — дебаг-режим. Поставьте `False`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
+- `PSQL_URL` - postgresql url [как задать](https://github.com/jazzband/dj-database-url#url-schema)
+- `ROLLBAR_ENABLED` - Включает(True) или отключает(False) rollbar. Default False
 - `ROLLBAR_TOKEN` - Для отслеживания исключений во время разработки. В Project Access Tokens выберите post_server_item [Rollbar](https://rollbar.com/)
 - `ROLLBAR_ENV` - development или production. В зависимости от режима DEBUG.
-- `PSQL_URL` - postgresql url [как задать](https://github.com/jazzband/dj-database-url#url-schema)
+
 
 Также нужно добавить 2 переменные в окружение:
 Введите в терминале корня проекта

@@ -1,0 +1,14 @@
+FROM python:3.9
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /burger
+COPY requirements.txt /burger/
+
+RUN pip install --no-cache-dir -r requirements.txt
+RUN SECRET_KEY=NOT_IMPORTANT_VALUE python manage.py collectstatic --no-input
+EXPOSE 80
+COPY . .
+
+CMD ["python", "-m", "gunicorn", "-b", "127.0.0.1:8080", "star_burger.wsgi:application"]

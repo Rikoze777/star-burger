@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+
+  db:
+    container_name: db
+    image: postgres:14.6-alpine
+    env_file:
+      - ../.env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  backend:
+    container_name: backend
+    build:
+      context: ../.
+      dockerfile: Dockerfile.backend
+    ports:
+      - '8000:8000'
+    volumes:
+      - ../bundles:/burger/bundles
+      - ../media:/burger/media
+      - ../staticfiles:/burger/staticfiles
+    env_file:
+      - ../.env
+    command: bash -c 'python manage.py collectstatic --noinput && python:/burger/manage.py runserver 0.0.0.0:8000'
+    depends_on:
+      db:
+        condition: service_started
+      frontend:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  
+  frontend:
+    container_name: frontend
+    build:
+      context: ../.
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - ../bundles:/burger/bundles
+
+volumes:
+  postgres:
